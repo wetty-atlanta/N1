@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漫画プロット Q&A アプリ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --background-color: #f4f7f9;
+            --card-background-color: #ffffff;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --answer-bg-color: #e9ecef;
+        }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: var(--card-background-color);
+            padding: 20px 30px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        h1 {
+            font-size: 2rem;
+            text-align: center;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+        .input-section { margin-bottom: 25px; }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(145deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        #answer-container { margin-top: 30px; }
+        #answer-display {
+            padding: 25px;
+            background-color: var(--answer-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 100px;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>漫画プロット Q&A アプリ</h1>
+
+        <div class="input-section">
+            <label for="question-input">質問:</label>
+            <input type="text" id="question-input" placeholder="プロットに関する質問を入力してください">
+        </div>
+
+        <button id="submit-button">AIに質問する</button>
+
+        <div id="answer-container">
+            <label for="answer-display">AIの回答:</label>
+            <div id="answer-display">質問を入力してください...</div>
+        </div>
+    </div>
+
+    <script>
+        const questionInput = document.getElementById('question-input');
+        const submitButton = document.getElementById('submit-button');
+        const answerDisplay = document.getElementById('answer-display');
+
+        submitButton.addEventListener('click', async () => {
+            const question = questionInput.value;
+            if (!question.trim()) {
+                alert('質問を入力してください。');
+                return;
+            }
+            
+            answerDisplay.innerText = 'AIが回答を生成中です...';
+            submitButton.disabled = true;
+
+            try {
+                const response = await fetch('/.netlify/functions/ask-gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: question }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`サーバーエラー: ${errorData.details || errorData.error || response.statusText}`);
+                }
+
+                const data = await response.json();
+                answerDisplay.innerText = data.answer;
+
+            } catch (error) {
+                console.error('エラー:', error);
+                answerDisplay.innerText = `AIとの通信中にエラーが発生しました。\n${error.message}`;
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

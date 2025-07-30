@@ -1,0 +1,7 @@
+[build]
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  [functions.node_config]
+    node_version = "18"
