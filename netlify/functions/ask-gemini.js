@@ -83,7 +83,7 @@ exports.handler = async (event) => {
         // 5. 最終的なプロンプトを組み立てて、モデルに質問
         const prompt = `あなたはプロの漫画編集者です。提供された以下の「参考情報」にのみ基づいて、ユーザーからの「質問」に回答してください。\n\n# 参考情報\n---\n${context}\n---\n\n# 質問\n${question}`;
 
-        const result = await genAI.getGenerativeModel({ model: "gemini-1.5-pro" }).generateContent(prompt);
+        const result = await genAI.getGenerativeModel({ model: "gemini-1.5-flash" }).generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
